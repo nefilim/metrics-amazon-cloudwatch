@@ -1,13 +1,13 @@
 package com.pongr.metrics.amazoncloudwatch
 
 import com.codahale.metrics._
-import grizzled.slf4j.Logging
 
 import java.util.SortedMap
 import java.util.concurrent.TimeUnit
 import scala.collection.JavaConversions._
 
 import com.amazonaws.services.cloudwatch.model.StatisticSet
+import com.typesafe.scalalogging.slf4j.Logging
 
 object Percentile extends Enumeration {
   type Type = Value

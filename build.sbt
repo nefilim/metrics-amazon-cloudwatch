@@ -2,7 +2,7 @@ name := "metrics-amazon-cloudwatch"
 
 organization := "com.pongr"
 
-scalaVersion := "2.9.1"
+scalaVersion := "2.10.4"
 
 resolvers ++= Seq(
   "Sonatype" at "https://oss.sonatype.org/content/groups/public",
@@ -10,21 +10,28 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "org.specs2" %% "specs2" % "1.12.4" % "test",
+  "org.specs2" %% "specs2" % "2.3.10" % "test",
   "org.mockito" % "mockito-all" % "1.9.5" % "test",
-  "nl.grons" %% "metrics-scala" % "3.0.3",
-  "org.clapper" %% "grizzled-slf4j" % "0.6.10",
-  "com.amazonaws" % "aws-java-sdk" % "1.5.4"
+  "nl.grons" %% "metrics-scala" % "3.0.5_a2.3",
+  "com.amazonaws" % "aws-java-sdk" % "1.7.5",
+  "com.typesafe"     %% "scalalogging-slf4j"       % "1.0.1"
 )
 
-seq(sbtrelease.Release.releaseSettings: _*)
+releaseSettings
 
 //http://www.scala-sbt.org/using_sonatype.html
 //https://docs.sonatype.org/display/Repository/Sonatype+OSS+Maven+Repository+Usage+Guide
+//publishTo <<= version { v: String =>
+//  val nexus = "https://oss.sonatype.org/"
+//  if (v.trim.endsWith("SNAPSHOT")) Some("snapshots" at nexus + "content/repositories/snapshots/")
+//  else                             Some("releases" at nexus + "service/local/staging/deploy/maven2/")
+//}
 publishTo <<= version { v: String =>
-  val nexus = "https://oss.sonatype.org/"
-  if (v.trim.endsWith("SNAPSHOT")) Some("snapshots" at nexus + "content/repositories/snapshots/")
-  else                             Some("releases" at nexus + "service/local/staging/deploy/maven2/")
+  val nexus = "https://nexus.playmino.com/nexus/"
+  if (v.trim.endsWith("SNAPSHOT"))
+    Some("snapshots" at nexus + "content/repositories/snapshots")
+  else
+    Some("releases" at nexus + "content/repositories/releases")
 }
 
 publishMavenStyle := true

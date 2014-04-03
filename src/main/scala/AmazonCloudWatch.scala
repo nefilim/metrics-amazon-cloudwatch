@@ -1,26 +1,23 @@
 package com.pongr.metrics.amazoncloudwatch
 
-import com.codahale.metrics._
-import grizzled.slf4j.Logging
 
 import java.util.Date
 import java.util.concurrent.TimeUnit
 import scala.collection.JavaConversions._
 
-import com.amazonaws.auth.BasicAWSCredentials
+import com.amazonaws.auth.AWSCredentialsProvider
 import com.amazonaws.services.cloudwatch.AmazonCloudWatchClient
 import com.amazonaws.services.cloudwatch.model.{ StandardUnit, PutMetricDataRequest, MetricDatum, Dimension, StatisticSet }
+import com.typesafe.scalalogging.slf4j.Logging
 
 case class AmazonCloudWatch(
-  accessKeyId: String,
-  secretKey  : String,
+  awsCredentialProvider: AWSCredentialsProvider,
   nameSpace  : String,
   dimensions : Map[String, String]
 ) extends Logging {
 
   val dims     = dimensions.map { case (k, v) => (new Dimension).withName(k).withValue(v) }
-  val awsCreds = new BasicAWSCredentials(accessKeyId, secretKey)
-  val client   = new AmazonCloudWatchClient(awsCreds)
+  val client   = new AmazonCloudWatchClient(awsCredentialProvider)
 
 
   def timestamp = System.currentTimeMillis
@@ -34,6 +31,9 @@ case class AmazonCloudWatch(
     case TimeUnit.MINUTES      => StandardUnit.None
     case TimeUnit.HOURS        => StandardUnit.None
     case TimeUnit.DAYS         => StandardUnit.None
+    case _                     =>
+      logger.warn("do not know how to convert timeunit [{}] to StandardUnit", timeUnit)
+      StandardUnit.None
   }
 
   def sendStats(name: String, stats: StatisticSet, timestamp: Long, timeUnit: Option[TimeUnit] = None) {
@@ -46,7 +46,7 @@ case class AmazonCloudWatch(
       send(metricData)
     }
     else
-      debug("%s value is 0, cannot be sent to CloudWatch." format name)
+      logger.debug("{} value is 0, cannot be sent to CloudWatch.", name)
   }
 
   def sendValue(name: String, value: Double, timestamp: Long, timeUnit: Option[TimeUnit] = None) {
@@ -59,7 +59,7 @@ case class AmazonCloudWatch(
       send(metricData)
     }
     else
-      debug("%s value is 0, cannot be sent to CloudWatch." format name)
+      logger.debug("{} value is 0, cannot be sent to CloudWatch.", name)
   }
 
   def send(metricData: MetricDatum) {
@@ -67,8 +67,9 @@ case class AmazonCloudWatch(
       val metricRequest = (new PutMetricDataRequest).withMetricData(metricData).withNamespace(nameSpace)
       client.putMetricData(metricRequest)
     }
-    catch { case e =>
-      warn(e)
+    catch {
+      case e: Exception =>
+        logger.warn("failed to put metrics on cloudwatch", e)
     }
   }
 
