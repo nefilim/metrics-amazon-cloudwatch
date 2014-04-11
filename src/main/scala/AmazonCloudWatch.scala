@@ -9,15 +9,18 @@ import com.amazonaws.auth.AWSCredentialsProvider
 import com.amazonaws.services.cloudwatch.AmazonCloudWatchClient
 import com.amazonaws.services.cloudwatch.model.{ StandardUnit, PutMetricDataRequest, MetricDatum, Dimension, StatisticSet }
 import com.typesafe.scalalogging.slf4j.Logging
+import com.amazonaws.services.ec2.model.Region
 
 case class AmazonCloudWatch(
   awsCredentialProvider: AWSCredentialsProvider,
+  awsCloudWatchEndPoint: String,
   nameSpace  : String,
   dimensions : Map[String, String]
 ) extends Logging {
 
   val dims     = dimensions.map { case (k, v) => (new Dimension).withName(k).withValue(v) }
   val client   = new AmazonCloudWatchClient(awsCredentialProvider)
+  client.setEndpoint(awsCloudWatchEndPoint)
 
 
   def timestamp = System.currentTimeMillis
@@ -43,6 +46,19 @@ case class AmazonCloudWatch(
                                           .withStatisticValues(stats)
                                           .withTimestamp(new Date(timestamp))
                                           .withUnit(toStandardUnit(timeUnit))
+      send(metricData)
+    }
+    else
+      logger.debug("{} value is 0, cannot be sent to CloudWatch.", name)
+  }
+
+  def sendValueWithUnit(name: String, value: Double, timestamp: Long, unit: StandardUnit) {
+    if (value != 0d) {
+      val metricData = (new MetricDatum()).withDimensions(dims)
+        .withMetricName(name)
+        .withValue(value)
+        .withTimestamp(new Date(timestamp))
+        .withUnit(unit)
       send(metricData)
     }
     else

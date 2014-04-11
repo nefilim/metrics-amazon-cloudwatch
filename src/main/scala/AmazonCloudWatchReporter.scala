@@ -6,7 +6,7 @@ import java.util.SortedMap
 import java.util.concurrent.TimeUnit
 import scala.collection.JavaConversions._
 
-import com.amazonaws.services.cloudwatch.model.StatisticSet
+import com.amazonaws.services.cloudwatch.model.{StandardUnit, StatisticSet}
 import com.typesafe.scalalogging.slf4j.Logging
 
 object Percentile extends Enumeration {
@@ -80,7 +80,7 @@ class AmazonCloudWatchReporter(
   }
 
   def reportCounter(name: String, counter: Counter, timestamp: Long) {
-    sendValue(name, counter.getCount, timestamp)
+    sendValueWithUnit(name, counter.getCount, timestamp, StandardUnit.Count)
   }
 
   def reportGauge(name: String, gauge: Gauge[_], timestamp: Long) {
