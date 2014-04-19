@@ -9,7 +9,6 @@ import com.amazonaws.auth.AWSCredentialsProvider
 import com.amazonaws.services.cloudwatch.AmazonCloudWatchClient
 import com.amazonaws.services.cloudwatch.model.{ StandardUnit, PutMetricDataRequest, MetricDatum, Dimension, StatisticSet }
 import com.typesafe.scalalogging.slf4j.Logging
-import com.amazonaws.services.ec2.model.Region
 
 case class AmazonCloudWatch(
   awsCredentialProvider: AWSCredentialsProvider,
@@ -38,6 +37,13 @@ case class AmazonCloudWatch(
       logger.warn("do not know how to convert timeunit [{}] to StandardUnit", timeUnit)
       StandardUnit.None
   }
+
+  def toRateUnit(timeUnit: TimeUnit): StandardUnit = timeUnit match {
+      case TimeUnit.SECONDS => StandardUnit.CountSecond
+      case _ =>
+        logger.warn("do not know how to convert rate timeunit [{}] to StandardUnit", timeUnit)
+        StandardUnit.None
+    }
 
   def sendStats(name: String, stats: StatisticSet, timestamp: Long, timeUnit: Option[TimeUnit] = None) {
     if (stats.getSum != 0 && stats.getSampleCount != 0) {

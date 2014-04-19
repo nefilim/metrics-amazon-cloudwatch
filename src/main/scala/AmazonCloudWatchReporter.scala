@@ -92,22 +92,22 @@ class AmazonCloudWatchReporter(
   }
 
   def reportMeter(name: String, meter: Metered, timestamp: Long) {
-    sendValue(name + ".count", meter.getCount, timestamp, Some(rateUnit))
+    sendValueWithUnit(name + ".count", meter.getCount, timestamp, StandardUnit.Count)
     reportRates(name, meter, timestamp)
   }
 
   def reportRates(name: String, meter: Metered, timestamp: Long) {
     if (sendMeanRate)
-      sendValue(name + ".mean_rate", convertRate(meter.getMeanRate), timestamp, Some(rateUnit))
+      sendValueWithUnit(name + ".mean_rate", convertRate(meter.getMeanRate), timestamp, toRateUnit(rateUnit))
 
     if (sendOneMinuteRate)
-      sendValue(name + ".m1_rate", convertRate(meter.getOneMinuteRate), timestamp, Some(rateUnit))
+      sendValueWithUnit(name + ".m1_rate", convertRate(meter.getOneMinuteRate), timestamp, toRateUnit(rateUnit))
 
     if (sendFiveMinuteRate)
-      sendValue(name + ".m5_rate", convertRate(meter.getFiveMinuteRate), timestamp, Some(rateUnit))
+      sendValueWithUnit(name + ".m5_rate", convertRate(meter.getFiveMinuteRate), timestamp, toRateUnit(rateUnit))
 
     if (sendFiveMinuteRate)
-      sendValue(name + ".m15_rate", convertRate(meter.getFifteenMinuteRate), timestamp, Some(rateUnit))
+      sendValueWithUnit(name + ".m15_rate", convertRate(meter.getFifteenMinuteRate), timestamp, toRateUnit(rateUnit))
   }
 
 }
