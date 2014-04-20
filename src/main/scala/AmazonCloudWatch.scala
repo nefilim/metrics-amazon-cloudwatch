@@ -13,8 +13,9 @@ import com.typesafe.scalalogging.slf4j.Logging
 case class AmazonCloudWatch(
   awsCredentialProvider: AWSCredentialsProvider,
   awsCloudWatchEndPoint: String,
-  nameSpace  : String,
-  dimensions : Map[String, String]
+  nameSpace: String,
+  dimensions: Map[String, String],
+  smallestValueToConsider: Double = 0.0001
 ) extends Logging {
 
   val dims     = dimensions.map { case (k, v) => (new Dimension).withName(k).withValue(v) }
@@ -58,40 +59,35 @@ case class AmazonCloudWatch(
       logger.debug("{} value is 0, cannot be sent to CloudWatch.", name)
   }
 
-  def sendValueWithUnit(name: String, value: Double, timestamp: Long, unit: StandardUnit) {
-    if (value != 0d) {
-      val metricData = (new MetricDatum()).withDimensions(dims)
-        .withMetricName(name)
-        .withValue(value)
-        .withTimestamp(new Date(timestamp))
-        .withUnit(unit)
-      send(metricData)
-    }
+  private def normalizeCloudWatchValue(value: Double): Double = {
+    if (value > -1 * smallestValueToConsider && value < smallestValueToConsider) // cloudwatch doesn't like very small values, this is small enough for us to be negligible
+      0
     else
-      logger.debug("{} value is 0, cannot be sent to CloudWatch.", name)
+      value
+  }
+
+  def sendValueWithUnit(name: String, value: Double, timestamp: Long, unit: StandardUnit) {
+    val metricData = (new MetricDatum()).withDimensions(dims)
+      .withMetricName(name)
+      .withValue(normalizeCloudWatchValue(value))
+      .withTimestamp(new Date(timestamp))
+      .withUnit(unit)
+
+    send(metricData)
   }
 
   def sendValue(name: String, value: Double, timestamp: Long, timeUnit: Option[TimeUnit] = None) {
-    if (value != 0d) {
-      val metricData = (new MetricDatum()).withDimensions(dims)
-                                          .withMetricName(name)
-                                          .withValue(value)
-                                          .withTimestamp(new Date(timestamp))
-                                          .withUnit(toStandardUnit(timeUnit))
-      send(metricData)
-    }
-    else
-      logger.debug("{} value is 0, cannot be sent to CloudWatch.", name)
+    sendValueWithUnit(name, value, timestamp, toStandardUnit(timeUnit))
   }
 
   def send(metricData: MetricDatum) {
+    val metricRequest = (new PutMetricDataRequest).withMetricData(metricData).withNamespace(nameSpace)
     try {
-      val metricRequest = (new PutMetricDataRequest).withMetricData(metricData).withNamespace(nameSpace)
       client.putMetricData(metricRequest)
     }
     catch {
       case e: Exception =>
-        logger.warn("failed to put metrics on cloudwatch", e)
+        logger.warn(s"failed to put metrics [$metricRequest] on cloudwatch", e)
     }
   }
 
