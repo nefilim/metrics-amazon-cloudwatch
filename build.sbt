@@ -13,8 +13,8 @@ libraryDependencies ++= Seq(
   "org.specs2" %% "specs2" % "2.3.10" % "test",
   "org.mockito" % "mockito-all" % "1.9.5" % "test",
   "nl.grons" %% "metrics-scala" % "3.0.5_a2.3",
-  "com.amazonaws" % "aws-java-sdk" % "1.7.5",
-  "com.typesafe"     %% "scalalogging-slf4j"       % "1.0.1"
+  "com.amazonaws" % "aws-java-sdk" % "1.7.6",
+  "com.typesafe"     %% "scalalogging-slf4j"       % "1.1.0"
 )
 
 releaseSettings
