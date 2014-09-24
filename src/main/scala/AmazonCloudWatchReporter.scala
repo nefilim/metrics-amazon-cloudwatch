@@ -4,10 +4,11 @@ import com.codahale.metrics._
 
 import java.util.SortedMap
 import java.util.concurrent.TimeUnit
+import com.typesafe.scalalogging.slf4j.LazyLogging
+
 import scala.collection.JavaConversions._
 
 import com.amazonaws.services.cloudwatch.model.{StandardUnit, StatisticSet}
-import com.typesafe.scalalogging.slf4j.Logging
 
 object Percentile extends Enumeration {
   type Type = Value
@@ -32,7 +33,7 @@ class AmazonCloudWatchReporter(
   val sendMeanRate         : Boolean = false,
   val sendStdDev           : Boolean = false,
   val percentilesToSend    : List[Percentile.Type] = Nil
-) extends ScheduledReporter (registry, "amazon-cloudwatch-reporter", filter, rateUnit, durationUnit) with Logging {
+) extends ScheduledReporter (registry, "amazon-cloudwatch-reporter", filter, rateUnit, durationUnit) with LazyLogging {
 
   import Percentile._
   import amazonCloudWatch._

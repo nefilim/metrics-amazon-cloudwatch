@@ -3,12 +3,13 @@ package com.pongr.metrics.amazoncloudwatch
 
 import java.util.Date
 import java.util.concurrent.TimeUnit
+import com.typesafe.scalalogging.slf4j.LazyLogging
+
 import scala.collection.JavaConversions._
 
 import com.amazonaws.auth.AWSCredentialsProvider
 import com.amazonaws.services.cloudwatch.AmazonCloudWatchClient
 import com.amazonaws.services.cloudwatch.model.{ StandardUnit, PutMetricDataRequest, MetricDatum, Dimension, StatisticSet }
-import com.typesafe.scalalogging.slf4j.Logging
 
 case class AmazonCloudWatch(
   awsCredentialProvider: AWSCredentialsProvider,
@@ -16,7 +17,7 @@ case class AmazonCloudWatch(
   nameSpace: String,
   dimensions: Map[String, String],
   smallestValueToConsider: Double = 0.0001
-) extends Logging {
+) extends LazyLogging {
 
   val dims     = dimensions.map { case (k, v) => (new Dimension).withName(k).withValue(v) }
   val client   = new AmazonCloudWatchClient(awsCredentialProvider)
