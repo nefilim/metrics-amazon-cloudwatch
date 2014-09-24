@@ -12,8 +12,8 @@ resolvers ++= Seq(
 libraryDependencies ++= Seq(
   "org.specs2" %% "specs2" % "2.3.10" % "test",
   "org.mockito" % "mockito-all" % "1.9.5" % "test",
-  "nl.grons" %% "metrics-scala" % "3.0.5_a2.3",
-  "com.amazonaws" % "aws-java-sdk" % "1.7.6",
+  "nl.grons" %% "metrics-scala" % "3.3.0",
+  "com.amazonaws" % "aws-java-sdk" % "1.8.10.2",
   "com.typesafe.scala-logging"     %% "scala-logging-slf4j"       % "2.1.2"
 )
 
