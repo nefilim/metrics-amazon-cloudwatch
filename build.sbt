@@ -2,7 +2,7 @@ name := "metrics-amazon-cloudwatch"
 
 organization := "com.pongr"
 
-scalaVersion := "2.10.4"
+scalaVersion := "2.11.4"
 
 resolvers ++= Seq(
   "Sonatype" at "https://oss.sonatype.org/content/groups/public",
@@ -10,12 +10,14 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "org.specs2" %% "specs2" % "2.3.10" % "test",
+  "org.specs2" %% "specs2" % "2.3.13" % "test",
   "org.mockito" % "mockito-all" % "1.9.5" % "test",
   "nl.grons" %% "metrics-scala" % "3.3.0",
   "com.amazonaws" % "aws-java-sdk" % "1.8.10.2",
   "com.typesafe.scala-logging"     %% "scala-logging-slf4j"       % "2.1.2"
 )
+
+crossScalaVersions := Seq("2.10.4", "2.11.4")
 
 releaseSettings
 
